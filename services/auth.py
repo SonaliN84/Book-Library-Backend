@@ -18,6 +18,10 @@ class CreateUserRequest(BaseModel):
     email: str
     password: str
 
+class UserData(BaseModel):
+    email: str
+    password: str
+
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
 
@@ -41,11 +45,11 @@ class AuthService:
         self.db.add(create_user_model)
         self.db.commit()
 
-    def login_user(self,email,password):
-        user =self.db.query(Users).filter(Users.email == email).first()
+    def login_user(self,user_data:UserData):
+        user =self.db.query(Users).filter(Users.email == user_data.email).first()
         if not user:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail='Could not validate user.')
-        if not bcrypt_context.verify(password,user.password):
+        if not bcrypt_context.verify(user_data.password,user.password):
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail='Incorrect password')
         
         token = create_access_token(user.id,timedelta(days=1))
