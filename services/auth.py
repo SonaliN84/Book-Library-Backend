@@ -36,6 +36,9 @@ class AuthService:
         self.db = db
 
     def create_user(self,user:CreateUserRequest):
+        get_user =self.db.query(Users).filter(Users.email == user.email).first()
+        if get_user:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="Email already exist!!")
         create_user_model = Users(
         name = user.name,
         email = user.email,
@@ -46,7 +49,7 @@ class AuthService:
         self.db.commit()
 
     def login_user(self,user_data:UserData):
-        user =self.db.query(Users).filter(Users.email == user_data.email).first()
+        user =self.db.query(Users).filter(Users.email == user_data.username).first()
         if not user:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail='Could not validate user.')
         if not bcrypt_context.verify(user_data.password,user.password):
