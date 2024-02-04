@@ -1,5 +1,6 @@
 from database import Base
 from sqlalchemy import Column,Integer,String,DateTime
+from sqlalchemy.orm import relationship
 
 class Books(Base):
     __tablename__ ='books'
@@ -8,8 +9,10 @@ class Books(Base):
     title = Column(String(255),unique=True)
     author = Column(String(255))
     image = Column(String(255))
-    description = Column(String(255))
+    description = Column(String(500))
     rating = Column(Integer)
     launched = Column(DateTime)
     quantity = Column(Integer)
     availability = Column(Integer)
+
+    users = relationship("UserBook", back_populates="books")
