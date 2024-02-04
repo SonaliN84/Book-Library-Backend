@@ -12,3 +12,8 @@ router = APIRouter(
 async def request_book(data :dict,user: dict = Depends(get_current_user),db: Session = Depends(get_db)):
     user_book_service = UserBookService(db)
     return user_book_service.request_book(user,data)
+
+@router.get("/pending-books", status_code = status.HTTP_200_OK)
+async def pending_books(user: dict = Depends(get_current_user),db: Session = Depends(get_db)):
+    user_book_service = UserBookService(db)
+    return user_book_service.pending_books(user)
