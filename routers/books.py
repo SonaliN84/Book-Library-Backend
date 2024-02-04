@@ -12,3 +12,10 @@ router = APIRouter(
 async def create_book(book_request: BookRequest,user: dict = Depends(get_current_user),db: Session = Depends(get_db)):
     book_service = BookService(db)
     return book_service.create_book(user,book_request)
+
+@router.get("/books", status_code = status.HTTP_200_OK)
+async def get_books(user: dict = Depends(get_current_user),db: Session = Depends(get_db)):
+    book_service = BookService(db)
+    return book_service.get_books(user)
+
+

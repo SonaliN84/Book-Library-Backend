@@ -23,6 +23,12 @@ class BookService:
         get_book =self.db.query(Books).filter(Books.title == book.title).first()
         if get_book:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="Book already exist!!")
+    
         create_book_model = Books(**book.dict(),availability=book.quantity)
         self.db.add(create_book_model)
         self.db.commit()    
+
+    def get_books(self,user: dict):
+        if user is None:
+            raise HTTPException(status_code=401, detail='Authentication Failed')  
+        return self.db.query(Books).all(); 
