@@ -93,5 +93,16 @@ class UserBookService:
             
             return { "details":"Book issued successfully"}
          
-
-
+    def reject_book_request(self,user:dict,id:int):
+        if user is None:
+            raise HTTPException(status_code=401, detail='Authentication Failed')
+        
+        data = self.db.query(UserBook).filter(UserBook.id == id).first()
+        if data.status == 'Pending' or data.status == 'Rejected':
+            data.status = "Rejected"
+            self.db.add(data)
+            self.db.commit()
+            return {"details":"Book request rejetced!"}
+        if data.status == 'Issued':
+            return {"details":"Sorry,other admin accepted the book issue request!"}  
+          

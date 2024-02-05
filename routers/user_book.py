@@ -24,3 +24,9 @@ async def accept_book_request(user: dict = Depends(get_current_user),db: Session
     print(id)
     user_book_service = UserBookService(db)
     return user_book_service.accept_book_request(user,id)
+
+@router.put("/reject-book/{id}", status_code=status.HTTP_200_OK,response_model=DetailResponse)
+async def accept_book_request(user: dict = Depends(get_current_user),db: Session = Depends(get_db),id: int = Path(gt=0)):
+    print(id)
+    user_book_service = UserBookService(db)
+    return user_book_service.reject_book_request(user,id)
