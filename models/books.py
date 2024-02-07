@@ -12,7 +12,5 @@ class Books(Base):
     description = Column(String(500))
     rating = Column(Integer)
     launched = Column(DateTime)
-    quantity = Column(Integer)
-    availability = Column(Integer)
 
     users = relationship("UserBook", back_populates="books")

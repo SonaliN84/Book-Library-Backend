@@ -1,8 +1,9 @@
 from fastapi import APIRouter,Depends,Path
 from sqlalchemy.orm import Session
 from starlette import status
-from dependencies import get_db,get_current_user
-from services.user_book import UserBookService,DetailResponse
+from commons.dependencies import get_db,get_current_user
+from services.user_book import UserBookService
+from schema.schema import DetailResponse
 
 
 router = APIRouter(
@@ -30,3 +31,9 @@ async def accept_book_request(user: dict = Depends(get_current_user),db: Session
     print(id)
     user_book_service = UserBookService(db)
     return user_book_service.reject_book_request(user,id)
+
+@router.put("/return-book/{id}", status_code=status.HTTP_200_OK,response_model=DetailResponse)
+async def return_book_request(user: dict = Depends(get_current_user),db: Session = Depends(get_db),id: int = Path(gt=0)):
+    print(id)
+    user_book_service = UserBookService(db)
+    return user_book_service.return_book_request(user,id)

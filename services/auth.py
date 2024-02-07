@@ -1,6 +1,5 @@
 from models.users import Users
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
 from passlib.context import CryptContext
 from fastapi import HTTPException
 from starlette import status
@@ -8,19 +7,11 @@ from datetime import timedelta, datetime
 from jose import jwt
 import os
 from dotenv import load_dotenv
+from schema.schema import CreateUserRequest,UserData
 
 load_dotenv()
 
 bcrypt_context = CryptContext(schemes = ['bcrypt'],deprecated = 'auto')
-
-class CreateUserRequest(BaseModel):
-    name: str
-    email: str
-    password: str
-
-class UserData(BaseModel):
-    email: str
-    password: str
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
@@ -51,7 +42,7 @@ class AuthService:
     def login_user(self,user_data:UserData):
         user =self.db.query(Users).filter(Users.email == user_data.username).first()
         if not user:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail='Could not validate user.')
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail='Email does not exist, please sign up first!!')
         if not bcrypt_context.verify(user_data.password,user.password):
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail='Incorrect password')
         

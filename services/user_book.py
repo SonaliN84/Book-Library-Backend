@@ -4,10 +4,7 @@ from models.user_book import UserBook
 from models.books import Books
 from models.users import Users
 from sqlalchemy import select
-from pydantic import BaseModel
-
-class DetailResponse(BaseModel):
-    details: str
+from datetime import datetime
 
 class UserBookService:
     def __init__(self,db: Session):
@@ -23,15 +20,12 @@ class UserBookService:
         if db_user is None or db_book is None:
            raise HTTPException(status_code=404, detail="User or book not found")
         
-        db_user_book = self.db.query(UserBook).filter(UserBook.user_id == user.get('id')).filter(UserBook.book_id == data.get('book_id')).first()
-        
-        if db_user_book is not None:
-            if db_user_book.status == "Pending":
-                raise HTTPException(status_code=400, detail="Book already requested!!") 
+        book_pending = self.db.query(UserBook).filter(UserBook.user_id == user.get("id")).filter(UserBook.book_id == data.get('book_id')).filter(UserBook.status == 'Pending').first()
+        book_issued = self.db.query(UserBook).filter(UserBook.user_id == user.get("id")).filter(UserBook.book_id == data.get('book_id')).filter(UserBook.status == 'Issued').first()
 
-            if db_user_book.status == "Issued":
-                raise HTTPException(status_code=400, detail="Book already issued!!")  
-        
+        if book_issued is not None or book_pending is not None:
+          raise HTTPException(status_code=400, detail='Book already requested or issued!')
+ 
         user_book_data=UserBook(user_id=user.get('id'), book_id=data.get('book_id'), status="Pending")
         self.db.add(user_book_data)
         self.db.commit()
@@ -76,19 +70,10 @@ class UserBookService:
             return {"details":"Book already issued!!"}
         
         if data.status == "Pending":
-            book = self.db.query(Books).filter(Books.id == data.book_id).first()
-
-            if book.availability <= 0:
-                raise HTTPException(status_code=400, detail='Book is out of stock...can not issue!!')
-
-            # student validation
-
-            book.availability = book.availability - 1
-            print(book.availability)
             data.status = "Issued"
+            data.issued_date = datetime.now()
             print(data.status)
             self.db.add(data)
-            self.db.add(book)
             self.db.commit()
             
             return { "details":"Book issued successfully"}
@@ -106,3 +91,14 @@ class UserBookService:
         if data.status == 'Issued':
             return {"details":"Sorry,other admin accepted the book issue request!"}  
           
+    
+    def return_book_request(self,user:dict,id:int):
+        if user is None:
+            raise HTTPException(status_code=401, detail='Authentication Failed')
+        
+        data = self.db.query(UserBook).filter(UserBook.id == id).first()
+        data.status = "Returned"
+        data.return_date = datetime.now()
+        self.db.add(data)
+        self.db.commit()
+        return {"details":"Book returned successfully"} 
