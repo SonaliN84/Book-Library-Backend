@@ -4,9 +4,9 @@ from typing import Annotated
 from sqlalchemy.orm import Session
 from starlette import status
 from models.users import Users
-from dependencies import get_db
-from services.auth import AuthService,CreateUserRequest,UserData
-
+from commons.dependencies import get_db
+from services.auth import AuthService
+from schema.schema import CreateUserRequest
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 
 router = APIRouter(
